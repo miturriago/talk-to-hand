@@ -2,7 +2,7 @@
 
 
 
-Talk To Hand, Aplicación móvil para traducción en timepo real del lenguaje de señas Colombiano.
+Talk To Hand, mobile application for real-time translation of Colombian sign language.
 
 # Installation
 
@@ -18,8 +18,12 @@ Installing all the dependencies of project, run following command:
 
 Start the project, run following command:
 
-`npm start`
+`npm run start`
 
+Open other terminal amd run following command∫∫∫:
+
+`npm run android` or
+`npm run ios`
 ## Branches
 
 | Branch         | Description                          |
