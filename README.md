@@ -20,10 +20,10 @@ Start the project, run following command:
 
 `npm run start`
 
-Open other terminal amd run following command:
+Open other terminal amd run following command∫∫∫:
 
-`npm run start` or
-`npm run start`
+`npm run android` or
+`npm run ios`
 ## Branches
 
 | Branch         | Description                          |
