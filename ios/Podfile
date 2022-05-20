@@ -23,6 +23,11 @@ target 'TalkToHand' do
 
   pod 'RNReanimated', :path => '../node_modules/react-native-reanimated'
 
+  pod 'VisionCamera', :path => '../node_modules/react-native-vision-camera'
+
+
+  pod 'react-native-blur', :path => '../node_modules/@react-native-community/blur'
+
   target 'TalkToHandTests' do
     inherit! :complete
     # Pods for testing

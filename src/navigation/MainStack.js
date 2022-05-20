@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Image, View, TouchableOpacity} from 'react-native';
 import Svg, {Path} from 'react-native-svg';
 import {
@@ -11,6 +11,8 @@ import HomeStack from './HomeStack';
 import SupportStack from './SupportStack';
 import TranslateStack from './TranslateStack';
 import ProfileStack from './ProfileStack';
+import {Camera, CameraPermissionStatus} from 'react-native-vision-camera';
+
 //import Icon from 'react-native-vector-icons/Ionicons';
 
 const Tab = createBottomTabNavigator();
@@ -161,6 +163,26 @@ function TabStack() {
 const Drawer = createDrawerNavigator();
 
 export default function MainStack(props) {
+  const [cameraPermission, setCameraPermission] = useState();
+  const [microphonePermission, setMicrophonePermission] = useState();
+
+  useEffect(() => {
+    Camera.getCameraPermissionStatus().then(setCameraPermission);
+    Camera.getMicrophonePermissionStatus().then(setMicrophonePermission);
+  }, []);
+
+  console.log(
+    `Re-rendering Navigator. Camera: ${cameraPermission} | Microphone: ${microphonePermission}`,
+  );
+
+  if (cameraPermission == null || microphonePermission == null) {
+    // still loading
+    return null;
+  }
+
+  const showPermissionsPage =
+    cameraPermission !== 'authorized' ||
+    microphonePermission === 'not-determined';
   return (
     <Drawer.Navigator initialRouteName="Tab">
       <Drawer.Screen
