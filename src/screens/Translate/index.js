@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -11,88 +11,106 @@ import {
 } from 'react-native';
 import {RNCamera} from 'react-native-camera';
 import Icon from 'react-native-vector-icons/AntDesign';
+import Icon2 from 'react-native-vector-icons/MaterialIcons';
+
 const PendingView = () => (
   <View>
     <Text>Wait...</Text>
   </View>
 );
 
-class Camara extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      type: false,
-      modalVisible: false,
-      rute: null,
-      isFaceDetected: false,
-      disabled: true,
-    };
-  }
-  render() {
-    return (
-      <View style={styles.container}>
-        <RNCamera
-          focusable
-          autoFocus={true}
-          captureAudio={false}
-          style={styles.preview}
-          type={
-            this.state.type
-              ? RNCamera.Constants.Type.back
-              : RNCamera.Constants.Type.front
-          }
-          flashMode={RNCamera.Constants.FlashMode.on}
-          androidCameraPermissionOptions={{
-            title: 'Permission to use  camera',
-            message: 'We need your permission to use your camera',
-            buttonPositive: 'Ok',
-            buttonNegative: 'Cance const [type, ]l',
-          }}>
-          {({camera, status}) => {
-            if (status !== 'READY') return <PendingView />;
-            return (
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: 'space-between',
-                }}>
-                <View style={styles.headerContent}>
-                  <TouchableOpacity
-                    onPress={() =>
-                      this.setState({
-                        type: !this.state.type,
-                      })
-                    }
-                    style={styles.revert}>
-                    <Icon name="sync" size={25} color="white" />
-                  </TouchableOpacity>
-                </View>
+function Camara() {
+  const [type, setType] = useState(false);
+  const [modalVisible, setVisible] = useState(false);
+  const [rute, setRute] = useState(null);
+  const [isFaceDetected, stIsFaceDetected] = useState(false);
+  const [disabled, setDisabled] = useState(true);
+  const [camara, setCamara] = useState(null);
 
-                <View style={styles.model}></View>
+  const start = async camara => {
+    setInterval(takePicture(camara), 8000);
+  };
 
-                <View style={styles.card}>
-                  <Text style={styles.cardText}>HOLA</Text>
-                </View>
-              </View>
-            );
-          }}
-        </RNCamera>
-      </View>
-    );
-  }
-
-  takePicture = async function (camera) {
+  const takePicture = async camera => {
     const options = {quality: 0.5};
     const data = await camera.takePictureAsync(options);
     //document. body. appendChild(data);
-    this.setState({
-      rute: data.uri,
+    setRute(data.uri);
+    console.log(data.uri);
+    console.log({
+      uri: data.uri,
+      name: 'signLanguage.jpg',
+      type: 'image/jpg',
     });
-
-    this.setState({
-      modalVisible: true,
+    var formData = new FormData();
+    formData.append('file', {
+      uri: data.uri,
+      name: signLanguage.jpg,
+      type: 'image/jpg',
     });
+    const config = {
+      method: 'POST',
+      body: formData,
+    };
+    fetch('URL', config)
+      .then(response => {
+        console.log('RESPONSEEEE', response);
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
+  return (
+    <View style={styles.container}>
+      <RNCamera
+        focusable
+        autoFocus={true}
+        captureAudio={false}
+        style={styles.preview}
+        type={
+          type ? RNCamera.Constants.Type.back : RNCamera.Constants.Type.front
+        }
+        flashMode={RNCamera.Constants.FlashMode.on}
+        androidCameraPermissionOptions={{
+          title: 'Permission to use  camera',
+          message: 'We need your permission to use your camera',
+          buttonPositive: 'Ok',
+          buttonNegative: 'Cance const [type, ]l',
+        }}>
+        {({camera, status}) => {
+          if (status !== 'READY') return <PendingView />;
+          return (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'space-between',
+              }}>
+              <View style={styles.headerContent}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setType(!type);
+                  }}
+                  style={styles.revert}>
+                  <Icon name="sync" size={25} color="white" />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.model}></View>
+
+              <View style={styles.card}>
+                <Text style={styles.cardText}>HOLA</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => start(camera)}
+                style={styles.capture}>
+                <Icon name="camerao" size={60} color="white" />
+              </TouchableOpacity>
+            </View>
+          );
+        }}
+      </RNCamera>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
