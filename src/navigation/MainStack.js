@@ -146,14 +146,7 @@ function TabStack() {
           headerShown: false,
         }}
       />
-      <Tab.Screen
-        name="Support"
-        component={SupportStack}
-        options={{
-          ...TransitionPresets.ModalSlideFromBottomIOS,
-          headerShown: false,
-        }}
-      />
+      
     </Tab.Navigator>
   );
 }

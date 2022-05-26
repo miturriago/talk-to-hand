@@ -12,6 +12,9 @@ import {
 import {RNCamera} from 'react-native-camera';
 import Icon from 'react-native-vector-icons/AntDesign';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
+import LottieView from 'lottie-react-native';
+import {loadOptions} from '@babel/core';
+import AwesomeAlert from 'react-native-awesome-alerts';
 
 const PendingView = () => (
   <View>
@@ -27,22 +30,19 @@ function Camara() {
   const [disabled, setDisabled] = useState(true);
   const [camara, setCamara] = useState(null);
   const [word, setWord] = useState('');
-
-  const start = async camara => {
-    setInterval(takePicture(camara), 8000);
-  };
+  const [load, setLoad] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [unknow, setUnknow] = useState(false);
 
   const takePicture = async camera => {
-    const options = {quality: 0.5};
+    setLoad(true);
+    setSending(true);
+
+    const options = {quality: 0.1};
     const data = await camera.takePictureAsync(options);
     //document. body. appendChild(data);
     setRute(data.uri);
-    console.log(data.uri);
-    console.log({
-      uri: data.uri,
-      name: 'signLanguage.jpg',
-      type: 'image/jpg',
-    });
+
     var formData = new FormData();
     formData.append('file', {
       uri: data.uri,
@@ -53,13 +53,73 @@ function Camara() {
       method: 'POST',
       body: formData,
     };
-    const response = await fetch('http://35.206.107.86:5000/upload', config);
-    const content = await response.json();
-    setWord(content.Detect);
-    console.log('respuestaaa', content);
+
+    try {
+      const response = await fetch('http://35.206.107.86:5000/upload', config);
+      const content = await response.json();
+      setWord(content.Detect);
+      setSending(false);
+      setVisible(true);
+      console.log('respuestaaa', content);
+    } catch (error) {
+      setSending(false);
+      setUnknow(true);
+      console.log(error);
+    }
+    setLoad(false);
   };
+
   return (
     <View style={styles.container}>
+      <AwesomeAlert
+        show={sending}
+        showProgress={true}
+        title="🕒 "
+        message="Procesando respuesta"
+        closeOnTouchOutside={false}
+        closeOnHardwareBackPress={false}
+        showConfirmButton={false}
+        confirmText="Ok"
+        confirmButtonColor="#29ABE2"
+        onConfirmPressed={() => setSending(false)}
+      />
+      <AwesomeAlert
+        show={unknow}
+        showProgress={false}
+        title="😞 "
+        message="No logramos reconocer la seña, vuelve a intentarlo"
+        closeOnTouchOutside={true}
+        closeOnHardwareBackPress={false}
+        showConfirmButton={true}
+        confirmText="Ok"
+        confirmButtonColor="red"
+        onConfirmPressed={() => setUnknow(false)}
+      />
+
+      <Modal
+        presentationStyle="overFullScreen"
+        style={styles.modalContainer}
+        animationType={'none'}
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          console.log('Modal has been closed.');
+        }}>
+        <View style={styles.modal}>
+          <Image style={styles.picture} source={{uri: rute}}></Image>
+
+          <View style={styles.row}>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => {
+                setVisible(false);
+              }}>
+              <Text style={styles.cardText}>{word}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <RNCamera
         focusable
         autoFocus={true}
@@ -95,12 +155,10 @@ function Camara() {
 
               <View style={styles.model}></View>
 
-              <View style={styles.card}>
-                <Text style={styles.cardText}>{word}</Text>
-              </View>
               <TouchableOpacity
+                disabled={load}
                 onPress={() => takePicture(camera)}
-                style={styles.capture}>
+                style={!load ? styles.capture : styles.captureDisabled}>
                 <Icon name="camerao" size={60} color="white" />
               </TouchableOpacity>
             </View>
@@ -112,6 +170,11 @@ function Camara() {
 }
 
 const styles = StyleSheet.create({
+  animation: {
+    height: Dimensions.get('window').height * 0.5,
+    marginLeft: Dimensions.get('window').width * 0.06,
+  },
+
   container: {
     flex: 1,
     flexDirection: 'column',
@@ -132,12 +195,27 @@ const styles = StyleSheet.create({
   capture: {
     flex: 0,
     backgroundColor: '#50B9E6',
-    height: Dimensions.get('window').height * 0.15,
+    height: Dimensions.get('window').height * 0.1,
     aspectRatio: 1,
     elevation: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    width: Dimensions.get('window').width * 0.3,
+    width: Dimensions.get('window').width * 0.1,
+    borderRadius: Dimensions.get('window').width,
+    borderColor: 'white',
+    borderWidth: Dimensions.get('window').height * 0.002,
+    alignSelf: 'center',
+    margin: Dimensions.get('window').height * 0.01,
+  },
+  captureDisabled: {
+    flex: 0,
+    backgroundColor: 'gray',
+    height: Dimensions.get('window').height * 0.1,
+    aspectRatio: 1,
+    elevation: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: Dimensions.get('window').width * 0.1,
     borderRadius: Dimensions.get('window').width,
     borderColor: 'white',
     borderWidth: Dimensions.get('window').height * 0.002,
@@ -245,7 +323,7 @@ const styles = StyleSheet.create({
   },
 
   picture: {
-    height: Dimensions.get('window').height * 0.91,
+    height: Dimensions.get('window').height * 0.8,
     width: Dimensions.get('window').width * 0.93,
   },
   row: {
