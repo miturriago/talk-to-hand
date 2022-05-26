@@ -38,7 +38,7 @@ function Camara() {
     setLoad(true);
     setSending(true);
 
-    const options = {quality: 0.1};
+    const options = {quality: 0.5};
     const data = await camera.takePictureAsync(options);
     //document. body. appendChild(data);
     setRute(data.uri);
@@ -106,6 +106,15 @@ function Camara() {
           console.log('Modal has been closed.');
         }}>
         <View style={styles.modal}>
+          <View style={styles.close}>
+            <TouchableOpacity
+              style={styles.btnClose}
+              onPress={() => {
+                setVisible(false);
+              }}>
+              <Icon name="close" size={20} color="white" />
+            </TouchableOpacity>
+          </View>
           <Image style={styles.picture} source={{uri: rute}}></Image>
 
           <View style={styles.row}>
@@ -173,6 +182,21 @@ const styles = StyleSheet.create({
   animation: {
     height: Dimensions.get('window').height * 0.5,
     marginLeft: Dimensions.get('window').width * 0.06,
+  },
+  close: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent:'flex-end'
+  },
+  btnClose: {
+    height: Dimensions.get('window').height * 0.07,
+    width: Dimensions.get('window').width * 0.16,
+    borderRadius: Dimensions.get('window').width,
+    backgroundColor: 'red',
+    aspectRatio: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: Dimensions.get('window').width * 0.03,
   },
 
   container: {

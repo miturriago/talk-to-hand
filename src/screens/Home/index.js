@@ -27,10 +27,16 @@ function HomeScreen() {
         <Text style={styles.cardTex}>
           {' '}
           Bienvenido a <Text style={styles.cardTextBold}>
-            TalkToHands{' '}
+            TalkToHands,{' '}
           </Text>{' '}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          lugar donde podrás traducir el lenguage de señas colombiano al español
+          por medio de tu cámara.
+        </Text>
+        <Text style={styles.cardTex}>
+          <Text style={styles.cardTextBold}>Empecemos... </Text>
+        </Text>
+        <Text style={styles.cardTex}>
+          <Text style={styles.cardTextBold}>⇩</Text>
         </Text>
       </View>
     </View>
@@ -62,6 +68,7 @@ const styles = StyleSheet.create({
   },
 
   cardTex: {
+    textAlign: 'center',
     fontSize: 25,
     color: 'grey',
     fontWeight: '300',

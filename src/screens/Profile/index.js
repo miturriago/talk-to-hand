@@ -19,19 +19,18 @@ function ProfileScreen() {
     <View style={styles.container}>
       <LottieView
         style={styles.animation}
-        source={require('../../assets/animation/welcome-animation.json')}
+        source={require('../../assets/animation/hands.json')}
         autoPlay
         loop
       />
       <View style={styles.card}>
         <Text style={styles.cardTex}>
           {' '}
-          Bienvenido a <Text style={styles.cardTextBold}>
-            TalkToHands{' '}
-          </Text>{' '}
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          <Text style={styles.cardTextBold}>TalkToHands </Text>
         </Text>
+        <Text style={styles.cardTex}> Juan Arteaga</Text>
+        <Text style={styles.cardTex}> Carla Duran</Text>
+        <Text style={styles.cardTex}> Mauricio Maldonado</Text>
       </View>
     </View>
   );
@@ -47,7 +46,7 @@ const styles = StyleSheet.create({
 
   animation: {
     height: Dimensions.get('window').height * 0.5,
-    marginLeft: Dimensions.get('window').width * 0.06,
+    marginLeft: Dimensions.get('window').width * 0.02,
   },
 
   card: {
@@ -64,6 +63,7 @@ const styles = StyleSheet.create({
   cardTex: {
     fontSize: 25,
     color: 'grey',
+    textAlign: 'center',
     fontWeight: '300',
   },
 
