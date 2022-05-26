@@ -26,6 +26,7 @@ function Camara() {
   const [isFaceDetected, stIsFaceDetected] = useState(false);
   const [disabled, setDisabled] = useState(true);
   const [camara, setCamara] = useState(null);
+  const [word, setWord] = useState('');
 
   const start = async camara => {
     setInterval(takePicture(camara), 8000);
@@ -45,20 +46,17 @@ function Camara() {
     var formData = new FormData();
     formData.append('file', {
       uri: data.uri,
-      name: signLanguage.jpg,
+      name: 'signLanguage.jpg',
       type: 'image/jpg',
     });
     const config = {
       method: 'POST',
       body: formData,
     };
-    fetch('URL', config)
-      .then(response => {
-        console.log('RESPONSEEEE', response);
-      })
-      .catch(err => {
-        console.log(err);
-      });
+    const response = await fetch('http://35.206.107.86:5000/upload', config);
+    const content = await response.json();
+    setWord(content.Detect);
+    console.log('respuestaaa', content);
   };
   return (
     <View style={styles.container}>
@@ -70,7 +68,7 @@ function Camara() {
         type={
           type ? RNCamera.Constants.Type.back : RNCamera.Constants.Type.front
         }
-        flashMode={RNCamera.Constants.FlashMode.on}
+        flashMode={RNCamera.Constants.FlashMode.off}
         androidCameraPermissionOptions={{
           title: 'Permission to use  camera',
           message: 'We need your permission to use your camera',
@@ -98,10 +96,10 @@ function Camara() {
               <View style={styles.model}></View>
 
               <View style={styles.card}>
-                <Text style={styles.cardText}>HOLA</Text>
+                <Text style={styles.cardText}>{word}</Text>
               </View>
               <TouchableOpacity
-                onPress={() => start(camera)}
+                onPress={() => takePicture(camera)}
                 style={styles.capture}>
                 <Icon name="camerao" size={60} color="white" />
               </TouchableOpacity>
