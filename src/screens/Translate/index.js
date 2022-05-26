@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -11,91 +11,194 @@ import {
 } from 'react-native';
 import {RNCamera} from 'react-native-camera';
 import Icon from 'react-native-vector-icons/AntDesign';
+import Icon2 from 'react-native-vector-icons/MaterialIcons';
+import LottieView from 'lottie-react-native';
+import {loadOptions} from '@babel/core';
+import AwesomeAlert from 'react-native-awesome-alerts';
+
 const PendingView = () => (
   <View>
     <Text>Wait...</Text>
   </View>
 );
 
-class Camara extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      type: false,
-      modalVisible: false,
-      rute: null,
-      isFaceDetected: false,
-      disabled: true,
-    };
-  }
-  render() {
-    return (
-      <View style={styles.container}>
-        <RNCamera
-          focusable
-          autoFocus={true}
-          captureAudio={false}
-          style={styles.preview}
-          type={
-            this.state.type
-              ? RNCamera.Constants.Type.back
-              : RNCamera.Constants.Type.front
-          }
-          flashMode={RNCamera.Constants.FlashMode.on}
-          androidCameraPermissionOptions={{
-            title: 'Permission to use  camera',
-            message: 'We need your permission to use your camera',
-            buttonPositive: 'Ok',
-            buttonNegative: 'Cance const [type, ]l',
-          }}>
-          {({camera, status}) => {
-            if (status !== 'READY') return <PendingView />;
-            return (
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: 'space-between',
-                }}>
-                <View style={styles.headerContent}>
-                  <TouchableOpacity
-                    onPress={() =>
-                      this.setState({
-                        type: !this.state.type,
-                      })
-                    }
-                    style={styles.revert}>
-                    <Icon name="sync" size={25} color="white" />
-                  </TouchableOpacity>
-                </View>
+function Camara() {
+  const [type, setType] = useState(false);
+  const [modalVisible, setVisible] = useState(false);
+  const [rute, setRute] = useState(null);
+  const [isFaceDetected, stIsFaceDetected] = useState(false);
+  const [disabled, setDisabled] = useState(true);
+  const [camara, setCamara] = useState(null);
+  const [word, setWord] = useState('');
+  const [load, setLoad] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [unknow, setUnknow] = useState(false);
 
-                <View style={styles.model}></View>
+  const takePicture = async camera => {
+    setLoad(true);
+    setSending(true);
 
-                <View style={styles.card}>
-                  <Text style={styles.cardText}>HOLA</Text>
-                </View>
-              </View>
-            );
-          }}
-        </RNCamera>
-      </View>
-    );
-  }
-
-  takePicture = async function (camera) {
     const options = {quality: 0.5};
     const data = await camera.takePictureAsync(options);
     //document. body. appendChild(data);
-    this.setState({
-      rute: data.uri,
-    });
+    setRute(data.uri);
 
-    this.setState({
-      modalVisible: true,
+    var formData = new FormData();
+    formData.append('file', {
+      uri: data.uri,
+      name: 'signLanguage.jpg',
+      type: 'image/jpg',
     });
+    const config = {
+      method: 'POST',
+      body: formData,
+    };
+
+    try {
+      const response = await fetch('http://35.206.107.86:5000/upload', config);
+      const content = await response.json();
+      setWord(content.Detect);
+      setSending(false);
+      setVisible(true);
+      console.log('respuestaaa', content);
+    } catch (error) {
+      setSending(false);
+      setUnknow(true);
+      console.log(error);
+    }
+    setLoad(false);
   };
+
+  return (
+    <View style={styles.container}>
+      <AwesomeAlert
+        show={sending}
+        showProgress={true}
+        title="🕒 "
+        message="Procesando respuesta"
+        closeOnTouchOutside={false}
+        closeOnHardwareBackPress={false}
+        showConfirmButton={false}
+        confirmText="Ok"
+        confirmButtonColor="#29ABE2"
+        onConfirmPressed={() => setSending(false)}
+      />
+      <AwesomeAlert
+        show={unknow}
+        showProgress={false}
+        title="😞 "
+        message="No logramos reconocer la seña, vuelve a intentarlo"
+        closeOnTouchOutside={true}
+        closeOnHardwareBackPress={false}
+        showConfirmButton={true}
+        confirmText="Ok"
+        confirmButtonColor="red"
+        onConfirmPressed={() => setUnknow(false)}
+      />
+
+      <Modal
+        presentationStyle="overFullScreen"
+        style={styles.modalContainer}
+        animationType={'none'}
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          console.log('Modal has been closed.');
+        }}>
+        <View style={styles.modal}>
+          <View style={styles.close}>
+            <TouchableOpacity
+              style={styles.btnClose}
+              onPress={() => {
+                setVisible(false);
+              }}>
+              <Icon name="close" size={20} color="white" />
+            </TouchableOpacity>
+          </View>
+          <Image style={styles.picture} source={{uri: rute}}></Image>
+
+          <View style={styles.row}>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => {
+                setVisible(false);
+              }}>
+              <Text style={styles.cardText}>{word}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <RNCamera
+        focusable
+        autoFocus={true}
+        captureAudio={false}
+        style={styles.preview}
+        type={
+          type ? RNCamera.Constants.Type.back : RNCamera.Constants.Type.front
+        }
+        flashMode={RNCamera.Constants.FlashMode.off}
+        androidCameraPermissionOptions={{
+          title: 'Permission to use  camera',
+          message: 'We need your permission to use your camera',
+          buttonPositive: 'Ok',
+          buttonNegative: 'Cance const [type, ]l',
+        }}>
+        {({camera, status}) => {
+          if (status !== 'READY') return <PendingView />;
+          return (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'space-between',
+              }}>
+              <View style={styles.headerContent}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setType(!type);
+                  }}
+                  style={styles.revert}>
+                  <Icon name="sync" size={25} color="white" />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.model}></View>
+
+              <TouchableOpacity
+                disabled={load}
+                onPress={() => takePicture(camera)}
+                style={!load ? styles.capture : styles.captureDisabled}>
+                <Icon name="camerao" size={60} color="white" />
+              </TouchableOpacity>
+            </View>
+          );
+        }}
+      </RNCamera>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
+  animation: {
+    height: Dimensions.get('window').height * 0.5,
+    marginLeft: Dimensions.get('window').width * 0.06,
+  },
+  close: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent:'flex-end'
+  },
+  btnClose: {
+    height: Dimensions.get('window').height * 0.07,
+    width: Dimensions.get('window').width * 0.16,
+    borderRadius: Dimensions.get('window').width,
+    backgroundColor: 'red',
+    aspectRatio: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: Dimensions.get('window').width * 0.03,
+  },
+
   container: {
     flex: 1,
     flexDirection: 'column',
@@ -116,12 +219,27 @@ const styles = StyleSheet.create({
   capture: {
     flex: 0,
     backgroundColor: '#50B9E6',
-    height: Dimensions.get('window').height * 0.15,
+    height: Dimensions.get('window').height * 0.1,
     aspectRatio: 1,
     elevation: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    width: Dimensions.get('window').width * 0.3,
+    width: Dimensions.get('window').width * 0.1,
+    borderRadius: Dimensions.get('window').width,
+    borderColor: 'white',
+    borderWidth: Dimensions.get('window').height * 0.002,
+    alignSelf: 'center',
+    margin: Dimensions.get('window').height * 0.01,
+  },
+  captureDisabled: {
+    flex: 0,
+    backgroundColor: 'gray',
+    height: Dimensions.get('window').height * 0.1,
+    aspectRatio: 1,
+    elevation: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: Dimensions.get('window').width * 0.1,
     borderRadius: Dimensions.get('window').width,
     borderColor: 'white',
     borderWidth: Dimensions.get('window').height * 0.002,
@@ -229,7 +347,7 @@ const styles = StyleSheet.create({
   },
 
   picture: {
-    height: Dimensions.get('window').height * 0.91,
+    height: Dimensions.get('window').height * 0.8,
     width: Dimensions.get('window').width * 0.93,
   },
   row: {
