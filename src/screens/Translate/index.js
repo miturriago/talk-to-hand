@@ -57,7 +57,11 @@ function Camara() {
     try {
       const response = await fetch('http://35.206.107.86:5000/upload', config);
       const content = await response.json();
-      setWord(content.Detect);
+      if (content?.Detect) {
+        let arrayResul = content.Detect.split(' ');
+        let percentage = parseInt(arrayResul[1], 10);
+        setWord(arrayResul[0] + ' ' + percentage + '%');
+      }
       setSending(false);
       setVisible(true);
       console.log('respuestaaa', content);
@@ -66,28 +70,18 @@ function Camara() {
       setUnknow(true);
       console.log(error);
     }
+    setSending(false);
+
     setLoad(false);
   };
 
   return (
     <View style={styles.container}>
       <AwesomeAlert
-        show={sending}
-        showProgress={true}
-        title="🕒 "
-        message="Procesando respuesta"
-        closeOnTouchOutside={false}
-        closeOnHardwareBackPress={false}
-        showConfirmButton={false}
-        confirmText="Ok"
-        confirmButtonColor="#29ABE2"
-        onConfirmPressed={() => setSending(false)}
-      />
-      <AwesomeAlert
         show={unknow}
         showProgress={false}
         title="😞 "
-        message="No logramos reconocer la seña, vuelve a intentarlo"
+        message="Lo siento no pude reconocer tu seña, pero aprendo rápido "
         closeOnTouchOutside={true}
         closeOnHardwareBackPress={false}
         showConfirmButton={true}
@@ -95,6 +89,24 @@ function Camara() {
         confirmButtonColor="red"
         onConfirmPressed={() => setUnknow(false)}
       />
+      <Modal
+        presentationStyle="overFullScreen"
+        style={styles.modalContainer}
+        animationType={'none'}
+        transparent={true}
+        visible={sending}
+        onRequestClose={() => {
+          console.log('Modal has been closed.');
+        }}>
+        <View style={styles.modal}>
+          <LottieView
+            style={styles.animation}
+            source={require('../../assets/animation/load.json')}
+            autoPlay
+            loop
+          />
+        </View>
+      </Modal>
 
       <Modal
         presentationStyle="overFullScreen"
@@ -180,13 +192,12 @@ function Camara() {
 
 const styles = StyleSheet.create({
   animation: {
-    height: Dimensions.get('window').height * 0.5,
-    marginLeft: Dimensions.get('window').width * 0.06,
+    height: Dimensions.get('window').height * 0.9,
   },
   close: {
     display: 'flex',
     alignItems: 'flex-end',
-    justifyContent:'flex-end'
+    justifyContent: 'flex-end',
   },
   btnClose: {
     height: Dimensions.get('window').height * 0.07,
