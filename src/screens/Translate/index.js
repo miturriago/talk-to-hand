@@ -59,7 +59,7 @@ function Camara() {
       const content = await response.json();
       if (content?.Detect) {
         let arrayResul = content.Detect.split(' ');
-        let percentage = parseInt(arrayResul[1], 10) + 52;
+        let percentage = parseInt(arrayResul[1], 10);
         setWord(arrayResul[0] + ' ' + percentage + '%');
       }
       setSending(false);
